@@ -1,6 +1,8 @@
 # bath_generator
 This little python script helps with cutting a fragment in a cristal
 
+It works from a cif file
+
 This program need Atomsk to run, you can download it here :
 
 http://atomsk.univ-lille1.fr/index.php

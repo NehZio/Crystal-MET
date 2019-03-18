@@ -311,40 +311,62 @@ def main():
 
     coords = translation([nA*a/2,nB*b/2,nC*c/2],coords)                    #Putting the origin at the center of the cell
 
-    ################ SPECIFIC FOR THE WANTED FRAG ###################
-    
+        
     labels = [i[3] for i in coords]
 
-    nearestIridium = [100,100,100]
+    center = raw_input("Specify the center of the fragment (if between atoms, specify them all) ").split()  #Searching for the center according to user
+    centers = []                                                                                            #input, and translating the coordinates
+    for i in range(len(center)):
+        centers.append([100,100,100])
+
+    for i in centers:
+        i.append(distance([0,0,0],i))
+
     for i in coords:
-        if i[3] == 'Ir':
-            if distance([0,0,0],[i[0],i[1],i[2]]) < distance([0,0,0],nearestIridium) and distance([0,0,0],[i[0],i[1],i[2]]) > 1:
-                nearestIridium = i
-    nearestIridium = [np.absolute(nearestIridium[0]), nearestIridium[1], nearestIridium[2]]
+        centers = sorted(centers,key=operator.itemgetter(3))
+        if i[3] in center:
+            if distance(i,[0,0,0]) <= centers[-1][3]:
+                centers[-1] = [i[0],i[1],i[2],distance(i,[0,0,0])]
 
-    rMat = rot_matrix([1,0,0],nearestIridium)
-    coords = rotation(coords, rMat)
-    print("Rotated to a new X axis")
+    newOgn = np.mean(np.array(centers),axis=0)
+    newOgn = [newOgn[0], newOgn[1], newOgn[2]]
 
-    coords = translation([0.5*distance([0,0,0],nearestIridium),0,0],coords)
+    coords = translation(newOgn,coords)
 
-    print("Translation ok")
+    axis = ['x','y','z']
 
+    for k in axis:
+        nAxis = raw_input("Where should the %s axis be headed ? (if between atoms, specify them all) "%k).split() #Searching for the new orientation
+        nAxiss = []                                                                                               #according to user input, and      
+                                                                                                                  #rotating the coordinates
+        for i in range(len(nAxis)):
+            nAxiss.append([100,100,100])
 
-    nearestOxygen = [100,100,100]
-    for i in range(len(labels)):
-        if labels[i] == 'O':
-            if distance([0,0,0],[coords[i][0],coords[i][1],coords[i][2]]) < distance([0,0,0],nearestOxygen) :
-                    nearestOxygen = coords[i]
+        for i in nAxiss:
+            i.append(distance([0,0,0],i))
 
-    rMat = rot_matrix([0,0,1],nearestOxygen)
-    coords = rotation(coords,rMat)
-    print("Rotated to a new Z axis")
-    coords = [[coords[i][0],coords[i][1],coords[i][2],labels[i]] for i in range(len(coords))]
+        for i in coords:
+            nAxiss = sorted(nAxiss,key=operator.itemgetter(3))
+            if i[3] in nAxis:
+                if distance(i,[0,0,0]) <= nAxiss[-1][3]:
+                    nAxiss[-1] = [i[0],i[1],i[2],distance(i,[0,0,0])]
+        newN = np.mean(np.array(nAxiss),axis=0)
+        newN = [newN[0],newN[1],newN[2]]
 
-    #################################################################a
-    
-    
+        if k == 'x':
+            oldN = [1,0,0]
+        elif k == 'y':
+            oldN = [0,1,0]
+        elif k == 'z':
+            oldN = [0,0,1]
+
+        rMat = rot_matrix(oldN,newN)
+        coords = rotation(coords,rMat)
+        coords = [[coords[i][0],coords[i][1],coords[i][2],labels[i]] for i in range(len(coords))]
+   
+   #We now have one big cell oriented and centered as we want
+   #The rest of the code will cut what we want in this big cell
+
     coords = cut_bath(rBath,coords)
     coords = find_frag(coords)
     coords = set_pp(rPP,coords)
