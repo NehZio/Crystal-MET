@@ -9,6 +9,10 @@ a = 5.48463
 b = 5.48463
 c = 25.7977
 
+alpha = 90
+beta = 90
+gamma = 90
+
 dr = 0.001
 da = 0.01
 DA = 1.5
@@ -99,17 +103,21 @@ def set_pp(rPP,coords):
         coords[i][4] = 'Cl'
     return coords
 
-def find_frag(coords):
-    for i in coords:
-        if distance(i,[0,0,0]) < 1: 
-            i[4] = 'O'
-            for j in range(len(coords)):
-                if distance(i,coords[j]) != 0 and distance(i,coords[j]) < 2.00:
-                    coords[j][4] = 'O'
-                    for k in range(len(coords)):
-                        if distance(coords[j],coords[k]) != 0 and distance(coords[j],coords[k]) < 2.06:
-                            coords[k][4] = 'O'
-
+def find_frag(frags, coords):                                                           #We mark the atoms in the bath corresponding to
+                                                                                        #the fragment according to user input 
+    for i in range(len(frags)/2):                                                      
+        inFrag = []
+        for j in range(int(frags[2*i])):
+            inFrag.append([100,100,100])
+        for j in inFrag:
+            j.append(distance(j,[0,0,0]))
+        for j in coords:
+            inFrag = sorted(inFrag,key=operator.itemgetter(3))
+            if j[3] == frags[2*i+1]:
+                if distance(j,[0,0,0]) <= inFrag[-1][3]:
+                    inFrag[-1] = [j[0],j[1],j[2], distance(j,[0,0,0]), coords.index(j)]
+        for j in inFrag:
+            coords[j[4]][4] = 'O'
 
     return coords
 
@@ -295,10 +303,10 @@ def main():
     rPP = input("Chose the pseudopotential radius (in Angstrom) : ")
 
     nA = int(np.floor(2*rBath/a)+2)                                    #We chose the number of time we need to replicate
-    nB = int(np.floor(2*rBath/b)+2)                                    #to be able to cut the bath 
-    nC = int(np.floor(2*rBath/c)+2)
+    nB = int(np.floor(2*rBath/(b*np.sin(np.radians(gamma)))+2)         #to be able to cut the bath 
+    nC = int(np.floor(2*rBath/(c*np.sin(np.radians(beta))))+2)
 
-    cmd = 'atomsk '+ fileName + ' ' +  '-duplicate ' + str(nA) + ' ' + str(nB) + ' ' + str(nC) + ' ' + fileName.replace('cif','xyz') + ' -v 0'
+    cmd = 'atomsk '+ fileName + ' ' +  '-duplicate ' + str(nA) + ' ' + str(nB) + ' ' + str(nC) + ' ' + fileName.replace('cif','xyz') + ' -v 0' #This is the command that calls the program that generates the big cell
     os.system(cmd)
 
 
@@ -336,9 +344,11 @@ def main():
     axis = ['x','y','z']
 
     for k in axis:
-        nAxis = raw_input("Where should the %s axis be headed ? (if between atoms, specify them all) "%k).split() #Searching for the new orientation
+        nAxis = raw_input("Where should the %s axis be headed ? (if between atoms, specify them all), x if none "%k).split() #Searching for the new orientation
         nAxiss = []                                                                                               #according to user input, and      
                                                                                                                   #rotating the coordinates
+        if nAxis[0] == 'x':
+            continue 
         for i in range(len(nAxis)):
             nAxiss.append([100,100,100])
 
@@ -367,10 +377,11 @@ def main():
    #We now have one big cell oriented and centered as we want
    #The rest of the code will cut what we want in this big cell
 
-    coords = cut_bath(rBath,coords)
-    coords = find_frag(coords)
-    coords = set_pp(rPP,coords)
+    frags = raw_input("What atoms should be in the fragment ? ").split()
 
+    coords = cut_bath(rBath,coords)
+    coords = find_frag(frags,coords)
+    coords = set_pp(rPP,coords)
 
     coords = eivgen(coords)
     ch = 0
@@ -419,19 +430,28 @@ def main():
     write_input(frag,pp,bath,fileName,sym)
 
     if raw_input("Do you want to visualize the bath ? (y/n) ") == 'y':
-        coords = frag+pp+bath
-        if sym == 'y':
-            for i in coords:
-                l = ['a','b','c','d','e','f','g','h']
-                if i[3][-1] in l:
-                    i[3] = i[3][:-1]
         g = open('tmp.xyz','w')
-        g.write('%i \n \n'%len(coords))
-        for i in coords:
-            g.write('%s    % 5.3f   % 5.3f   % 5.3f  \n'%(i[3],i[0],i[1],i[2]))
+        if raw_input("Do you want it to be sorted with colors ? (y/n) ") == 'y':
+            g.write('%i \n\n'%(len(frag)+len(pp)+len(bath)))
+            for i in frag:
+                g.write('O    % 5.3f   % 5.3f   % 5.3f  \n'%(i[0],i[1],i[2]))
+            for i in pp:
+                g.write('Cl    % 5.3f   % 5.3f   % 5.3f  \n'%(i[0],i[1],i[2]))
+            for i in bath:
+                g.write('C    % 5.3f   % 5.3f   % 5.3f  \n'%(i[0],i[1],i[2]))
+        else:
+            coords = frag+pp+bath
+            if sym == 'y':
+                for i in coords:
+                    l = ['a','b','c','d','e','f','g','h']
+                    if i[3][-1] in l:
+                        i[3] = i[3][:-1]
+            g.write('%i \n \n'%len(coords))
+            for i in coords:
+                g.write('%s    % 5.3f   % 5.3f   % 5.3f  \n'%(i[3],i[0],i[1],i[2]))
         g.close()
         os.system('avogadro tmp.xyz')
-        os.system('rm tmp.xyz')
+        #os.system('rm tmp.xyz')
 
 
 main()
