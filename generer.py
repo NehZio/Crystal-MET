@@ -88,14 +88,14 @@ def cut_bath(rBath, coords):
 
     return bath 
 
-def set_pp(rPP,coords):
+def set_pp(rPP,coords, notIn):
 
     pp = []
 
     for i in range(len(coords)):
         for j in range(len(coords)):
             if coords[i][4] == 'O':
-                if coords[j][4] == 'C' and coords[j][3] != 'O':
+                if coords[j][4] == 'C' and coords[j][3] not in notIn:
                     if distance([coords[i][0],coords[i][1],coords[i][2]],[coords[j][0],coords[j][1],coords[j][2]]) <= rPP:
                         coords[j][4] == 'Cl'
                         pp.append(j)
@@ -103,21 +103,28 @@ def set_pp(rPP,coords):
         coords[i][4] = 'Cl'
     return coords
 
-def find_frag(frags, coords):                                                           #We mark the atoms in the bath corresponding to
-                                                                                        #the fragment according to user input 
-    for i in range(len(frags)/2):                                                      
-        inFrag = []
-        for j in range(int(frags[2*i])):
-            inFrag.append([100,100,100])
-        for j in inFrag:
-            j.append(distance(j,[0,0,0]))
+def find_frag(pattern, n, coords):                                                           #We mark the atoms in the bath corresponding to
+                                                                                             #the fragment according to user input 
+    inFrag = []
+    for k in range(n):
+        closest = [100,100,100]
         for j in coords:
-            inFrag = sorted(inFrag,key=operator.itemgetter(3))
-            if j[3] == frags[2*i+1]:
-                if distance(j,[0,0,0]) <= inFrag[-1][3]:
-                    inFrag[-1] = [j[0],j[1],j[2], distance(j,[0,0,0]), coords.index(j)]
-        for j in inFrag:
-            coords[j[4]][4] = 'O'
+            if j[3] == pattern[1]:
+                if distance(j,[0,0,0]) < distance([0,0,0],closest) and [j[0],j[1],j[2],distance(j,j), coords.index(j)] not in inFrag:
+                    closest = [j[0],j[1],j[2],distance(j,j), coords.index(j)]
+        for i in range(1,len(pattern)/2):                                                      
+            inPattern = [closest]
+            for j in range(int(pattern[2*i])):
+                inPattern.append([100,100,100,distance([100,100,100],closest)])
+            for j in coords:
+                inPattern = sorted(inPattern,key=operator.itemgetter(3))
+                if j[3] == pattern[2*i+1]:
+                    if distance(j,closest) <= inPattern[-1][3]:
+                        inPattern[-1] = [j[0],j[1],j[2], distance(j,closest), coords.index(j)]
+            for j in inPattern:
+                inFrag.append(j)
+    for j in inFrag:
+        coords[j[4]][4] = 'O'
 
     return coords
 
@@ -301,9 +308,10 @@ def main():
     fileName = raw_input("Name of the cif file : ")
     rBath = input("Chose the bath radius (in Angstrom) : ")
     rPP = input("Chose the pseudopotential radius (in Angstrom) : ")
+    notIn = raw_input("What atoms should not be in the first shell ? ").split()
 
     nA = int(np.floor(2*rBath/a)+2)                                    #We chose the number of time we need to replicate
-    nB = int(np.floor(2*rBath/(b*np.sin(np.radians(gamma)))+2)         #to be able to cut the bath 
+    nB = int(np.floor(2*rBath/(b*np.sin(np.radians(gamma))))+2)         #to be able to cut the bath 
     nC = int(np.floor(2*rBath/(c*np.sin(np.radians(beta))))+2)
 
     cmd = 'atomsk '+ fileName + ' ' +  '-duplicate ' + str(nA) + ' ' + str(nB) + ' ' + str(nC) + ' ' + fileName.replace('cif','xyz') + ' -v 0' #This is the command that calls the program that generates the big cell
@@ -377,11 +385,16 @@ def main():
    #We now have one big cell oriented and centered as we want
    #The rest of the code will cut what we want in this big cell
 
-    frags = raw_input("What atoms should be in the fragment ? ").split()
+    pattern = raw_input("What pattern is in the fragment ? ").split()
+
+    n = input("How many time does the pattern repeat in the fragment ? ")
+
+
 
     coords = cut_bath(rBath,coords)
-    coords = find_frag(frags,coords)
-    coords = set_pp(rPP,coords)
+    coords = find_frag(pattern, n ,coords)
+    coords = set_pp(rPP,coords,notIn)
+
 
     coords = eivgen(coords)
     ch = 0
@@ -392,13 +405,21 @@ def main():
 
     os.system('rm '+fileName.replace('cif','xyz'))
 
-    while sym != 'y' and sym != 'n':
-        sym = raw_input("Do you want to treat the symmetry ? (y/n) ")
-
-    
     frag = sorted([i for i in coords if i[4] == 'O'],key=operator.itemgetter(3))
     pp = sorted([i for i in coords if i[4] == 'Cl'],key=operator.itemgetter(3))
     bath = sorted([i for i in coords if i[4] == 'C'],key=operator.itemgetter(3))
+
+    if raw_input("Do you want to see the fragment ? (y/n) ") == 'y':
+        g = open('tmp.xyz','w')
+        g.write('%i \n \n'%len(frag))
+        for j in frag:
+            g.write('%s   % 6.2f    % 6.2f    % 6.2f \n'%(j[3],j[0],j[1],j[2]))
+        g.close()
+        os.system('avogadro tmp.xyz')
+        #os.system('rm tmp.xyz')
+
+    while sym != 'y' and sym != 'n':
+        sym = raw_input("Do you want to treat the symmetry ? (y/n) ")
 
     if sym == 'y':
         operation = raw_input("What are the symmetry operations you'd like to treat ? (C2(x,y,z), xOy xOz yOz, i) ").split()
@@ -451,7 +472,7 @@ def main():
                 g.write('%s    % 5.3f   % 5.3f   % 5.3f  \n'%(i[3],i[0],i[1],i[2]))
         g.close()
         os.system('avogadro tmp.xyz')
-        #os.system('rm tmp.xyz')
+        os.system('rm tmp.xyz')
 
 
 main()

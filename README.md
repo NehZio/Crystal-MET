@@ -19,12 +19,7 @@ I'm not responsible of a missuse of the results given, neither am I of any colla
 
 
 
-Work still in progress, only work with Sr2IrO4 atm
-
-
 Might be a little slow if you try huge systems but it will never be stuck in a loop
-
-
 
 
 
