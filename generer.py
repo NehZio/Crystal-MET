@@ -5,9 +5,9 @@ import operator
 
 ###### CONSTANTS #######
 
-a = 5.48463
-b = 5.48463
-c = 25.7977
+a = 4.030
+b = 4.030
+c = 13.333
 
 alpha = 90
 beta = 90
@@ -21,6 +21,7 @@ DA = 1.5
 chO = -2.00
 chIr = 4.00
 chSr = 2.00
+chBa = 2.00
 dIrO = 2.50
 dSrO = 3.10
 #######################
@@ -283,8 +284,8 @@ def write_input(fragCoord,ppCoord,bathCoord,fileName, sym):
                 g.write('%4s      % 5.3f      % 5.3f       % 5.3f     angstrom\n' %(ppCoord[i][3].replace('a','')+str(i+1),ppCoord[i][0],ppCoord[i][1],ppCoord[i][2]))
         g.write("\n\n")
         for i in range(len(bathCoord)):
-            if bathCoord[i][3][-1] == 'a':
-                g.write('% 5.3f      % 5.3f     % 5.3f     % 5.3f    0.     0.    0.  \n'%(bathCoord[i][0],bathCoord[i][1],bathCoord[i][2],bathCoord[i][4]))
+           # if bathCoord[i][3][-1] == 'a':
+           g.write('% 5.3f      % 5.3f     % 5.3f     % 5.3f    0.     0.    0.  \n'%(bathCoord[i][0],bathCoord[i][1],bathCoord[i][2],bathCoord[i][4]))
     if sym == 'n':
         for i in range(len(fragCoord)):
             g.write('%4s      % 5.3f      % 5.3f       % 5.3f     angstrom\n' %(fragCoord[i][3]+str(i+1),fragCoord[i][0],fragCoord[i][1],fragCoord[i][2]))
@@ -330,6 +331,13 @@ def main():
         
     labels = [i[3] for i in coords]
 
+    if raw_input("Do you want to make an initial translation ? (y/n) ") == "y":
+        trsl = raw_input("Enter the coordinates of the translation ").split()
+        trsl[0] = float(trsl[0])
+        trsl[1] = float(trsl[1])
+        trsl[2] = float(trsl[2])
+        translation(trsl,coords)
+
     center = raw_input("Specify the center of the fragment (if between atoms, specify them all) ").split()  #Searching for the center according to user
     centers = []                                                                                            #input, and translating the coordinates
     for i in range(len(center)):
@@ -343,7 +351,6 @@ def main():
         if i[3] in center:
             if distance(i,[0,0,0]) <= centers[-1][3]:
                 centers[-1] = [i[0],i[1],i[2],distance(i,[0,0,0])]
-
     newOgn = np.mean(np.array(centers),axis=0)
     newOgn = [newOgn[0], newOgn[1], newOgn[2]]
 
@@ -416,7 +423,7 @@ def main():
             g.write('%s   % 6.2f    % 6.2f    % 6.2f \n'%(j[3],j[0],j[1],j[2]))
         g.close()
         os.system('avogadro tmp.xyz')
-        #os.system('rm tmp.xyz')
+        os.system('rm tmp.xyz')
 
     while sym != 'y' and sym != 'n':
         sym = raw_input("Do you want to treat the symmetry ? (y/n) ")
@@ -431,7 +438,8 @@ def main():
 
         frag = symmetry([[i[0],i[1],i[2]] for i in frag],[i[3] for i in frag], [i[5] for i in frag], operation)
         pp = symmetry([[i[0],i[1],i[2]] for i in pp],[i[3] for i in pp], [i[5] for i in pp], operation)
-        bath = symmetry([[i[0],i[1],i[2]] for i in bath],[i[3] for i in bath], [i[5] for i in bath], operation)
+        #bath = symmetry([[i[0],i[1],i[2]] for i in bath],[i[3] for i in bath], [i[5] for i in bath], operation)
+        bath = [[i[0],i[1],i[2],i[3],i[5]] for i in bath]
 
         coords = frag+pp+bath
         
