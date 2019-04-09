@@ -22,6 +22,8 @@ I'm not responsible of a missuse of the results given, neither am I of any colla
 Might be a little slow if you try huge systems but it will never be stuck in a loop
 
 
+Well it's REALLY slow
+
 
 
 You'll also need python 2.7 with numpy installed
