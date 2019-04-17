@@ -7,6 +7,11 @@ This program need Atomsk to run, you can download it here :
 
 http://atomsk.univ-lille1.fr/index.php
 
+This program also need few python packages:
+
+numpy
+scipy
+
 Please cite the creator of Atomsk :
 
 Pierre Hirel, Comput. Phys. Comm. 197 (2015) 212
@@ -20,13 +25,6 @@ I'm not responsible of a missuse of the results given, neither am I of any colla
 
 
 Might be a little slow if you try huge systems but it will never be stuck in a loop
-
-
-Well it's REALLY slow
-
-
-
-You'll also need python 2.7 with numpy installed
 
 
 Feel free to use, modify it :)

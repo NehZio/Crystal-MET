@@ -1,0 +1,58 @@
+Here's a little guide on how to write the input file
+
+
+MANDATORY KEYWORDS
+
+CIF system.cif
+
+BATH bath_radius
+
+PSEUDO first_shell_radius
+
+OUTPUT output_file_name
+
+PATTERN nAtom1 labelAtom1 nAtom2 labelAtom2 ...  (little tricky there, if there is more than 1 atom1, you have to put it another time)
+
+NPATTERN nPattern
+
+LATTICE
+a .
+b .
+c .
+alpha .
+beta .
+gamma .
+
+ATOMS label charge neighbours radius_of_the_neighbouring_sphere ...
+
+DIST 
+atom1 atom2 distance 
+...
+TSID
+
+END_OF_INPUT
+
+
+
+OPTIONNAL KEYWORDS
+
+TRANSLATE x y z
+
+CENTER  atom1 atom2 ...
+
+X_AXIS atom1 atom2 ...
+
+Y_AXIS  atom1  atom2 ...
+
+Z_AXIS atom1  atom2 ...
+
+NOTINPP atoms not in the first shell
+
+COLOR  see the bath sorted with colors
+
+NOCOLOR see the bath sorted by atoms
+
+SEEFRAG  see the fragment once found (recommended)
+
+OPTIMIZATION  to optimize the total charge of the bath to be 0 by slightly changing the charges of the outer shell atoms
+
