@@ -34,6 +34,7 @@ seefrag = 0
 opti = 0
 trsl = 'x'
 notIn = 'x'
+evj = 0
 
 chO = -2.00
 chIr = 4.00
@@ -65,6 +66,7 @@ def read_input(inputFile):
     global beta
     global gamma
     global visu
+    global evj
     global seefrag
     global opti
     global trsl
@@ -126,7 +128,7 @@ def read_input(inputFile):
             beta = float(f.readline().split()[1])
             gamma = float(f.readline().split()[1])
 
-            print("Lattice parameter : \na = %f \nb = %f \nc = %f \nalpha = %f \nbeta = %f \ngamma = %f \n"%(a,b,c,alpha,beta,gamma))
+            print("Lattice parameter : \na     = %f \nb     = %f \nc     = %f \nalpha = %f \nbeta  = %f \ngamma = %f \n"%(a,b,c,alpha,beta,gamma))
         elif line[0] == 'ATOMS':
             atoms = []
             for i in range(1,len(line)):
@@ -159,6 +161,8 @@ def read_input(inputFile):
             opti = 1
         elif line[0] == 'SEEFRAG':
             seefrag = 1
+        elif line[0] == 'EVJEN':
+            evj = 1
 
 def parse(fileName):
     f = open(fileName,'r')
@@ -379,34 +383,34 @@ def write_input(fragCoord,ppCoord,bathCoord,fileName, sym):
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(fragCoord)):
             if fragCoord[i][3][-1] == 'a':
-                g.write('%6s      % 7.3f      % 7.3f       % 7.3f      % 8.5f\n' %(fragCoord[i][3].replace('a','')+str(i+1),fragCoord[i][0],fragCoord[i][1],fragCoord[i][2],fragCoord[i][4]))
+                g.write('%8s      % 7.3f      % 7.3f       % 7.3f      % 8.5f\n' %(fragCoord[i][3].replace('a','')+str(i+1),fragCoord[i][0],fragCoord[i][1],fragCoord[i][2],fragCoord[i][4]))
         g.write("\n\n")
         g.write('PSEUDO \n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(ppCoord)):
             if ppCoord[i][3][-1] == 'a':
-                g.write('%6s      % 7.3f      % 7.3f       % 7.3f      % 8.5f\n' %(ppCoord[i][3].replace('a','')+str(i+1),ppCoord[i][0],ppCoord[i][1],ppCoord[i][2],ppCoord[i][4]))
+                g.write('%8s      % 7.3f      % 7.3f       % 7.3f      % 8.5f\n' %(ppCoord[i][3].replace('a','')+str(i+1),ppCoord[i][0],ppCoord[i][1],ppCoord[i][2],ppCoord[i][4]))
         g.write("\n\n")
         g.write('CHARGES\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(bathCoord)):
            # if bathCoord[i][3][-1] == 'a':
-           g.write('%6s       % 7.3f      % 7.3f       % 7.3f       % 8.5f\n'%(bathCoord[i][3]+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2],bathCoord[i][4]))
+           g.write('%8s       % 7.3f      % 7.3f       % 7.3f       % 8.5f\n'%(bathCoord[i][3]+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2],bathCoord[i][4]))
     if sym == 'x':
         g.write('FRAGMENT\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(fragCoord)):
-            g.write('%6s      % 7.3f      % 7.3f       % 7.3f       % 8.5f\n' %(fragCoord[i][3]+str(i+1),fragCoord[i][0],fragCoord[i][1],fragCoord[i][2], fragCoord[i][4]))
+            g.write('%8s      % 7.3f      % 7.3f       % 7.3f       % 8.5f\n' %(fragCoord[i][3]+str(i+1),fragCoord[i][0],fragCoord[i][1],fragCoord[i][2], fragCoord[i][4]))
         g.write('\n\n')
         g.write('PSEUDO\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(ppCoord)):
-            g.write('%6s      % 7.3f      % 7.3f       % 7.3f       % 8.5f\n' %(ppCoord[i][3]+str(i+1),ppCoord[i][0],ppCoord[i][1],ppCoord[i][2],ppCoord[i][4]))
+            g.write('%8s      % 7.3f      % 7.3f       % 7.3f       % 8.5f\n' %(ppCoord[i][3]+str(i+1),ppCoord[i][0],ppCoord[i][1],ppCoord[i][2],ppCoord[i][4]))
         g.write('\n\n')
         g.write('CHARGES\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(bathCoord)):
-            g.write('%6s      % 7.3f      % 7.3f       % 7.3f       % 8.5f\n' %(bathCoord[i][3]+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2], bathCoord[i][4]))
+            g.write('%8s      % 7.3f      % 7.3f       % 7.3f       % 8.5f\n' %(bathCoord[i][3]+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2], bathCoord[i][4]))
     g.close()
 
 def translation(vec, coords): 
@@ -480,6 +484,14 @@ def count_neighbours(coords):
             i.append(neighbour)
     return coords
 
+def evjen(coords):
+    for i in range(len(coords)):
+        if coords[i][5] == 'full':
+            coords[i][5] = atoms[atoms.index(coords[i][3])+1]
+        else:
+            coords[i][5] = atoms[atoms.index(coords[i][3])+1] * coords[i][5]/atoms[atoms.index(coords[i][3])+2]
+
+    return coords
 
 def main():
 
@@ -572,9 +584,11 @@ def main():
     coords = find_frag(pattern, npattern ,coords)
     coords = set_pp(rPP,coords,notIn)
 
-
-    #coords = eivgen(coords)
-    if opti == 1:
+    
+    if evj == 1:
+        coords = count_neighbours(coords)
+        coords = evjen(coords)
+    elif opti == 1:
         coords = count_neighbours(coords)
         coords = optimization(coords)
     else:

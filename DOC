@@ -56,3 +56,5 @@ SEEFRAG  see the fragment once found (recommended)
 
 OPTIMIZATION  to optimize the total charge of the bath to be 0 by slightly changing the charges of the outer shell atoms
 
+EVJEN  simili Evjen method to calculate the charge of the atom on the outer shell, note that OPTIMIZATION and EVJEN keywords can not be used together
+
