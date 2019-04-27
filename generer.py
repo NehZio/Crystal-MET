@@ -3,6 +3,7 @@ import numpy as np
 import os
 import operator
 import sys
+import datetime
 
 ###### CONSTANTS #######
 dr = 0.001
@@ -35,6 +36,7 @@ opti = 0
 trsl = 'x'
 notIn = 'x'
 evj = 0
+norep = 0
 
 chO = -2.00
 chIr = 4.00
@@ -44,6 +46,37 @@ dIrO = 2.50
 dSrO = 3.10
 dBaO = 3.10
 #######################
+def printProgressBar (start, now, iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '\u2588'):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    
+    hours = now.hour-start.hour
+    if now.minute-start.minute < 0:
+        minuts = 60 + now.minute-start.minute
+    else:
+        minuts = now.minute-start.minute
+    if now.second-start.second < 0:
+        second = 60 + now.second-start.second
+    else:
+        second = now.second-start.second
+    
+    print('\r%s |%s| %s%% %s Elapsed time : %2i h %2i m %2i s' % (prefix, bar, percent, suffix,hours,minuts,second), end = '\r')
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+
 def read_input(inputFile):
     global cif_file
     global rBath
@@ -71,6 +104,7 @@ def read_input(inputFile):
     global opti
     global trsl
     global notIn
+    global norep
     f = open(inputFile,'r')
     line = 'x'
     
@@ -163,6 +197,8 @@ def read_input(inputFile):
             seefrag = 1
         elif line[0] == 'EVJEN':
             evj = 1
+        elif line[0] == 'NOREP':
+            norep = 1
 
 def parse(fileName):
     f = open(fileName,'r')
@@ -224,7 +260,10 @@ def rotation(coord, rMat): #Apply a rotation to coordinates
 
 def cut_bath(rBath, coords): #Select which atoms are in the bath with distance constraint (sphere)
     bath = []
+    start = datetime.datetime.now()
     for i in range(len(coords)):
+        now = datetime.datetime.now()
+        printProgressBar(start,now,i+1,len(coords),prefix='Cutting the bath',length=50)
         if distance([0,0,0],[coords[i][0],coords[i][1],coords[i][2]]) <= rBath:
                 bath.append([coords[i][0], coords[i][1], coords[i][2], coords[i][3], 'C'])
 
@@ -233,8 +272,10 @@ def cut_bath(rBath, coords): #Select which atoms are in the bath with distance c
 def set_pp(rPP,coords, notIn): #Select which atoms are in the first shell of pseudopotential 
 
     pp = []
-
+    start = datetime.datetime.now()
     for i in range(len(coords)):
+        now = datetime.datetime.now()
+        printProgressBar(start,now,i+1,len(coords),prefix='Finding the first shell',length=50)
         for j in range(len(coords)):
             if coords[i][4] == 'O':
                 if coords[j][4] == 'C' and coords[j][3] not in notIn:
@@ -248,13 +289,16 @@ def set_pp(rPP,coords, notIn): #Select which atoms are in the first shell of pse
 def find_frag(pattern, n, coords):                                                           #We mark the atoms in the bath corresponding to
                                                                                              #the fragment according to user input 
     inFrag = []
+    start = datetime.datetime.now()
     for k in range(n):
         closest = [100,100,100]
+        now = datetime.datetime.now()
+        printProgressBar(start,now,k+1,n,prefix='Finding the fragment',length=50)
         for j in coords:
             if j[3] == pattern[1]:
                 if distance(j,[0,0,0]) < distance([0,0,0],closest) and [j[0],j[1],j[2],distance(j,j), coords.index(j)] not in inFrag:
                     closest = [j[0],j[1],j[2],distance(j,j), coords.index(j)]
-        for i in range(1,len(pattern)/2):                                                      
+        for i in range(1,len(pattern)//2):                                                      
             inPattern = [closest]
             for j in range(int(pattern[2*i])):
                 inPattern.append([100,100,100,distance([100,100,100],closest)])
@@ -273,6 +317,8 @@ def find_frag(pattern, n, coords):                                              
 
 def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the coordinates
     newCoord = []
+    total = len(coord)
+    start = datetime.datetime.now()
 
     while coord != []:
         toDel = []
@@ -304,18 +350,17 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
                     elif da < distance(t,d) and distance(t,d) < DA:
-                        print "Error : This atom should not be there",distance(t,d),t,d,a,charges[index]
-                        print "Are you sure about the xOz symmetry operation ?"
+                        print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
+                        print("Are you sure about the xOz symmetry operation ?")
                         break
                 if 'yOz' in operations:
                     if distance(t,b) <= da:
                         newCoord.append(b)
                         newCoord[-1].append(name+'b')
                         newCoord[-1].append(charges[index])
-                        toDel.append(index)
                     elif da < distance(t,b) and distance(t,b) < DA:
-                        print "Error : This atom should not be there",distance(t,b),t,b,a,charges[index]
-                        print "Are you sure about the yOz symmetry operation ?"
+                        print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
+                        print("Are you sure about the xOz symmetry operation ?")
                         break
                 if 'C2z' in operations:
                     if distance(t,c) <= da:
@@ -324,8 +369,8 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
                     elif da < distance(t,c) and distance(t,c) < DA:
-                        print "Error : This atom should not be there",distance(t,c),t,c,a,charges[index]
-                        print "Are you sure about the C2z axis ?"
+                        print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
+                        print("Are you sure about the xOz symmetry operation ?")
                         break
                 if 'xOy' in operations:
                     if distance(t,e) <= da:
@@ -334,8 +379,8 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
                     elif da < distance(t,e) and distance(t,e) < DA:
-                        print "Error : This atom should not be there",distance(t,e),t,e,a,charges[index]
-                        print "Are you sure about the xOy operation ?"
+                        print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
+                        print("Are you sure about the xOz symmetry operation ?")
                         break
                 if 'C2y' in operations:
                     if distance(t,f) <= da:
@@ -344,8 +389,8 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
                     elif da < distance(t,f) and distance(t,f) < DA:
-                        print "Error : This atom should not be there",distance(t,f),t,f,a,charges[index]
-                        print "Are you sure about the C2y axis ?"
+                        print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
+                        print("Are you sure about the xOz symmetry operation ?")
                         break
                 if 'C2x' in operations:
                     if distance(t,g) <= da:
@@ -354,8 +399,8 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
                     elif da < distance(t,g) and distance(t,g) < DA:
-                        print "Error : This atom should not be there",distance(t,g),t,g,a,charges[index]
-                        print "Are you sure about the C2x axis ?"
+                        print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
+                        print("Are you sure about the xOz symmetry operation ?")
                         break
                 if 'i' in operations:
                     if distance(t,h) <= da:
@@ -364,8 +409,8 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
                     elif da < distance(t,h) and distance(t,h) < DA:
-                        print "Error : This atom should not be there",distance(t,h),t,h,a,charges[index]
-                        print "Are you sure about the i operation ?"
+                        print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
+                        print("Are you sure about the xOz symmetry operation ?")
                         break
 
 
@@ -373,6 +418,8 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
             del coord[toDel[m]-m]
             del atoms[toDel[m]-m]
             del charges[toDel[m]-m]
+        now = datetime.datetime.now()
+        printProgressBar(start,now,total-len(coord),total,prefix='Treating Symmetry',length=50,decimals=3)
 
     return newCoord
 
@@ -394,8 +441,8 @@ def write_input(fragCoord,ppCoord,bathCoord,fileName, sym):
         g.write('CHARGES\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(bathCoord)):
-           # if bathCoord[i][3][-1] == 'a':
-           g.write('%8s       % 7.3f      % 7.3f       % 7.3f       % 8.5f\n'%(bathCoord[i][3]+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2],bathCoord[i][4]))
+           if bathCoord[i][3][-1] == 'a':
+               g.write('%8s       % 7.3f      % 7.3f       % 7.3f       % 8.5f\n'%(bathCoord[i][3].replace('a','')+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2],bathCoord[i][4]))
     if sym == 'x':
         g.write('FRAGMENT\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
@@ -473,9 +520,12 @@ def optimization(coords):
     return coords
 
 def count_neighbours(coords):
+    start = datetime.datetime.now()
     for i in coords:
         neighbour = 0
         for j in coords:
+            now = datetime.datetime.now()
+            printProgressBar(start,now,coords.index(j)+coords.index(i),2*len(coords),prefix='Counting neighbours',length=50)
             if distance(i,j) < atoms[atoms.index(i[3])+3] and i[3] != j[3]:
                 neighbour += 1
         if neighbour == atoms[atoms.index(i[3])+2]:
@@ -620,11 +670,15 @@ def main():
 
 
     if sym != 'x':
-        rep = 0
-        for i in range(len(coords)-1):
-            for j in range(i+1,len(coords)):
-                rep += (coords[i][5]*coords[j][5])/distance(coords[i],coords[j])
-        print("Nuclear repulsion before symmetry : %f"%rep)
+        if norep == 0:
+            rep = 0
+            start = datetime.datetime.now()
+            for i in range(len(coords)-1):
+                for j in range(i+1,len(coords)):
+                    now = datetime.datetime.now()
+                    printProgressBar(start,now,i*len(coords)+j,len(coords)**2,prefix='Calculating nuclear repulsion',length=50)
+                    rep += (coords[i][5]*coords[j][5])/distance(coords[i],coords[j])
+            print("Nuclear repulsion before symmetry : %f"%rep)
 
         frag = symmetry([[i[0],i[1],i[2]] for i in frag],[i[3] for i in frag], [i[5] for i in frag], sym)
         pp = symmetry([[i[0],i[1],i[2]] for i in pp],[i[3] for i in pp], [i[5] for i in pp], sym)
@@ -633,12 +687,15 @@ def main():
 
         coords = frag+pp+bath
         
-        rep = 0
-        for i in range(len(coords)-1):
-            for j in range(i+1,len(coords)):
-                rep += (coords[i][4]*coords[j][4])/distance(coords[i],coords[j])
-
-        print("Nuclear repulsion after symmetry : %f"%rep)
+        if norep == 0:
+            start = datetime.datetime.now()
+            rep = 0
+            for i in range(len(coords)-1):
+                for j in range(i+1,len(coords)):
+                    now = datetime.datetime.now()
+                    printProgressBar(start,now,i*len(coords)+j,len(coords)**2,prefix='Calculating nuclear repulsion',length=50)
+                    rep += (coords[i][4]*coords[j][4])/distance(coords[i],coords[j])
+            print("Nuclear repulsion after symmetry : %f"%rep)
     else:
         frag = [[i[0],i[1],i[2],i[3],i[5]] for i in frag]
         pp = [[i[0],i[1],i[2],i[3],i[5]] for i in pp]
