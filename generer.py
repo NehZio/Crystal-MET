@@ -62,17 +62,9 @@ def printProgressBar (start, now, iteration, total, prefix = '', suffix = '', de
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
     
-    hours = now.hour-start.hour
-    if now.minute-start.minute < 0:
-        minuts = 60 + now.minute-start.minute
-    else:
-        minuts = now.minute-start.minute
-    if now.second-start.second < 0:
-        second = 60 + now.second-start.second
-    else:
-        second = now.second-start.second
+    dif = now-start
     
-    print('\r%s |%s| %s%% %s Elapsed time : %2i h %2i m %2i s' % (prefix, bar, percent, suffix,hours,minuts,second), end = '\r')
+    print('\r%30s |%s| %5s%% %s Elapsed time : %s' % (prefix, bar, percent, suffix,str(dif)), end = '\r')
     # Print New Line on Complete
     if iteration == total: 
         print()
@@ -521,17 +513,36 @@ def optimization(coords):
 
 def count_neighbours(coords):
     start = datetime.datetime.now()
+
     for i in coords:
-        neighbour = 0
-        for j in coords:
+        i.append(0)
+
+    count = 0
+
+    for i in range(len(coords)-1):
+        for j in range(i+1,len(coords)):
+            count += 1
             now = datetime.datetime.now()
-            printProgressBar(start,now,coords.index(j)+coords.index(i),2*len(coords),prefix='Counting neighbours',length=50)
-            if distance(i,j) < atoms[atoms.index(i[3])+3] and i[3] != j[3]:
-                neighbour += 1
-        if neighbour == atoms[atoms.index(i[3])+2]:
-            i.append('full')
-        else:
-            i.append(neighbour)
+            printProgressBar(start,now,count,(len(coords)*(len(coords)-1))/2,prefix='Counting neighbours',length=50)
+            if distance(coords[i],coords[j]) < atoms[atoms.index(coords[i][3])+3] and coords[i][3] != coords[j][3]:
+                coords[i][5] += 1 
+                coords[j][5] += 1
+
+    for i in coords:
+        if i[5] == atoms[atoms.index(i[3])+2]:
+            i[5] == 'full'
+
+   # for i in coords:
+   #     neighbour = 0
+   #     for j in coords:
+   #         now = datetime.datetime.now()
+   #         printProgressBar(start,now,coords.index(j)+coords.index(i)*len(coords),len(coords)**2,prefix='Counting neighbours',length=50)
+   #         if distance(i,j) < atoms[atoms.index(i[3])+3] and i[3] != j[3]:
+   #             neighbour += 1
+   #     if neighbour == atoms[atoms.index(i[3])+2]:
+   #         i.append('full')
+   #     else:
+   #         i.append(neighbour)
     return coords
 
 def evjen(coords):
