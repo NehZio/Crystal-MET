@@ -4,7 +4,7 @@ There is no obligation to put any order in the keywords
 
 ## MANDATORY KEYWORDS
 
-1. BATH bath_radius
+* BATH bath_radius
 
 1. PSEUDO first_shell_radius
 
