@@ -29,3 +29,10 @@ The calculation increases exponentially as you increase the number of atoms in t
 Here are the results of some tests I made :
 
 ![GitHub Logo](/images/fig1.png) ![GitHub Logo](/images/fig2.png)
+
+ ## Contact
+ 
+ If you find any bug or have any question, please let me know :
+ 
+ * Twitter : @leo_gaspard
+ * Mail : leo.gaspard@outlook.fr
