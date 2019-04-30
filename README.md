@@ -18,10 +18,6 @@ Crystal MET uses :
 `python3 crystal_met.py INPUT_FILE`
 
 
-
-
-
-
 ## Performances 
 
 The calculation increases exponentially as you increase the number of atoms in the system you want.
