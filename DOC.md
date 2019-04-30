@@ -19,22 +19,33 @@ Not that, if you have more than once the Atom1, you will have to place it again 
 * LATTICE
 
   a cell_parameter_a
+  
   b cell_parameter_b
+  
   c cell_parameter_c
+  
   alpha cell_angle_alpha
+  
   beta cell_angle_beta
+  
   gamma cell_angle_gamma
 
 * ATOMS label charge neighbours radius_of_the_coordination_sphere ...
 
 * SYMOP
+
    x,y,z
+   
    ...
+   
    POMYS
    
 * GENERATOR
+
   atom1 x_frac y_frac z_frac
+  
   ...
+  
   ROTARENEG
   
 * END_OF_INPUT
@@ -81,5 +92,6 @@ Shows the fragment once found (recommended)
 Will use an optimization method to set the total charge to 0 by slightly changing the charges of the outer shell atoms
 
 * EVJEN 
+
 Simili Evjen method to calculate the charge of the atom on the outer shell, note that OPTIMIZATION and EVJEN keywords can not be used together
 
