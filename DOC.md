@@ -17,6 +17,7 @@ Not that, if you have more than once the Atom1, you will have to place it again 
 * NPATTERN nPattern
 
 * LATTICE
+
   a cell_parameter_a
   b cell_parameter_b
   c cell_parameter_c
