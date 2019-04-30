@@ -15,7 +15,7 @@ Crystal MET uses :
 
 ## Use
 
-`<addr>` python3 crystal_met.py INPUT_FILE
+`<python3 crystal_met.py INPUT_FILE>'
 
 
 
