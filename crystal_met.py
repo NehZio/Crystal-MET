@@ -5,12 +5,11 @@ import operator
 import sys
 import datetime
 
-###### CONSTANTS #######
+###### GLOBAL VARIABLES #######
 dr = 0.001
 da = 0.01
 DA = 1.5
 
-cif_file = 'x'
 rBath = 'x'
 rPP = 'x'
 center = 'x'
@@ -37,16 +36,58 @@ trsl = 'x'
 notIn = 'x'
 evj = 0
 norep = 0
+symop = []
+generator = []
 
-chO = -2.00
-chIr = 4.00
-chSr = 2.00
-chBa = 2.00
-dIrO = 2.50
-dSrO = 3.10
-dBaO = 3.10
-#######################
-def printProgressBar (start, now, iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '\u2588'):
+##############################
+def big_cell(na,nb,nc):
+    coords = []
+    newCoords = []
+    newNewCoords = []
+
+    for i in generator:
+        x = i[1]
+        y = i[2]
+        z = i[3]
+
+        for j in symop:
+            coords.append([eval(j[0]),eval(j[1]),eval(j[2]),i[0]])
+    
+    for i in coords:
+        i[0] *= a
+        i[1] *= b
+        i[2] *= c
+        if i[0] < 0:
+            i[0] += a
+        if i[1] < 0:
+            i[1] += b
+        if i[2] < 0:
+            i[2] += c
+    for i in coords:
+        if i not in newCoords:
+            if i[0] < a and i[1] < b and i[2] < c:
+                newCoords.append(i)
+    
+    for i in newCoords:
+        newNewCoords.append(i)
+        for j in range(1,na):
+            newNewCoords.append([i[0]+a*j,i[1],i[2],i[3]])
+            for k in range(1,nb):
+                newNewCoords.append([i[0]+a*j,i[1]+b*k,i[2],i[3]])
+                for l in range(1,nc):
+                    newNewCoords.append([i[0]+a*j,i[1]+b*k,i[2]+c*l,i[3]])
+            for k in range(1,nc):
+                newNewCoords.append([i[0]+a*j,i[1],i[2]+c*k,i[3]])
+        for j in range(1,nb):
+            newNewCoords.append([i[0],i[1]+b*j,i[2],i[3]])
+            for k in range(1,nc):
+                newNewCoords.append([i[0],i[1]+b*j,i[2]+c*k,i[3]])
+        for j in range(1,nc):
+            newNewCoords.append([i[0],i[1],i[2]+c*j,i[3]])
+
+    return newNewCoords
+
+def printProgressBar (start, now, iteration, total, prefix = '', suffix = '', decimals = 3, length = 100, fill = '\u2588'):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -64,13 +105,12 @@ def printProgressBar (start, now, iteration, total, prefix = '', suffix = '', de
     
     dif = now-start
     
-    print('\r%30s |%s| %5s%% %s Elapsed time : %s' % (prefix, bar, percent, suffix,str(dif)), end = '\r')
+    print('\r%30s |%s| %7s%% %s Elapsed time : %s   ' % (prefix, bar, percent, suffix,str(dif)),end='\r')
     # Print New Line on Complete
     if iteration == total: 
         print()
 
 def read_input(inputFile):
-    global cif_file
     global rBath
     global rPP
     global center
@@ -97,6 +137,8 @@ def read_input(inputFile):
     global trsl
     global notIn
     global norep
+    global symop
+    global generator
     f = open(inputFile,'r')
     line = 'x'
     
@@ -105,9 +147,6 @@ def read_input(inputFile):
         line = line.split()
         if line == []:
             continue
-        elif line[0] == 'CIF':
-            cif_file = line[1]
-            print("Informations taken from the file : %s\n"%(cif_file))
         elif line[0] == 'BATH':
             rBath = float(line[1])
             print("Bath radius : %f\n"%(rBath))
@@ -174,9 +213,9 @@ def read_input(inputFile):
                 dist.append([line[0],line[1],float(line[2])])
                 line = f.readline()
         elif line[0] == 'COLOR':
-            visu = 2
-        elif line[0] == 'NOCOLOR':
             visu = 1
+        elif line[0] == 'NOCOLOR':
+            visu = 2
         elif line[0] == 'TRANSLATE':
             trsl = [float(line[1]),float(line[2]),float(line[3])]
         elif line[0] == 'NOTINPP':
@@ -191,6 +230,17 @@ def read_input(inputFile):
             evj = 1
         elif line[0] == 'NOREP':
             norep = 1
+        elif line[0] == 'SYMOP':
+            line = f.readline()
+            while line.strip() != 'POMYS':
+                symop.append(line.split(','))
+                line = f.readline()
+        elif line[0] == 'GENERATOR':
+            line = f.readline()
+            while line.strip() != 'ROTARENEG':
+                gen = line.split()
+                generator.append([gen[0],float(gen[1]),float(gen[2]),float(gen[3])])
+                line = f.readline()
 
 def parse(fileName):
     f = open(fileName,'r')
@@ -311,7 +361,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
     newCoord = []
     total = len(coord)
     start = datetime.datetime.now()
-
+    progress = 0
     while coord != []:
         toDel = []
         newCoord.append(coord[0])         #Add the atom to a new list
@@ -326,9 +376,13 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
         h = [-a[0],-a[1],-a[2]]           #label h = i
         newCoord[-1].append(name+"a")
         newCoord[-1].append(charges[0])
+        progress += 1
         del atoms[0]                      #Delete from old list
         del coord[0]
         del charges[0]
+        
+        now = datetime.datetime.now()
+        printProgressBar(start,now,progress,total,prefix='Treating Symmetry',length=50,decimals=3)
 
         for t in coord:
             index = coord.index(t)
@@ -338,6 +392,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                 if 'xOz' in operations:
                     if distance(t,d) <= da:
                         newCoord.append(d)
+                        progress += 1
                         newCoord[-1].append(name+'d')
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
@@ -348,6 +403,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                 if 'yOz' in operations:
                     if distance(t,b) <= da:
                         newCoord.append(b)
+                        progress += 1
                         newCoord[-1].append(name+'b')
                         newCoord[-1].append(charges[index])
                     elif da < distance(t,b) and distance(t,b) < DA:
@@ -357,6 +413,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                 if 'C2z' in operations:
                     if distance(t,c) <= da:
                         newCoord.append(c)
+                        progress += 1
                         newCoord[-1].append(name+'c')
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
@@ -367,6 +424,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                 if 'xOy' in operations:
                     if distance(t,e) <= da:
                         newCoord.append(e)
+                        progress += 1
                         newCoord[-1].append(name+'e')
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
@@ -377,6 +435,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                 if 'C2y' in operations:
                     if distance(t,f) <= da:
                         newCoord.append(f)
+                        progress += 1
                         newCoord[-1].append(name+'f')
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
@@ -387,6 +446,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                 if 'C2x' in operations:
                     if distance(t,g) <= da:
                         newCoord.append(g)
+                        progress += 1
                         newCoord[-1].append(name+'g')
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
@@ -397,6 +457,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                 if 'i' in operations:
                     if distance(t,h) <= da:
                         newCoord.append(h)
+                        progress += 1
                         newCoord[-1].append(name+'h')
                         newCoord[-1].append(charges[index])
                         toDel.append(index)
@@ -404,14 +465,14 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
                         print("Are you sure about the xOz symmetry operation ?")
                         break
+                now = datetime.datetime.now()
+                printProgressBar(start,now,progress,total,prefix='Treating Symmetry',length=50,decimals=3)
 
 
         for m in range(len(toDel)):    #We delete the atoms seen in the simmetry
             del coord[toDel[m]-m]
             del atoms[toDel[m]-m]
             del charges[toDel[m]-m]
-        now = datetime.datetime.now()
-        printProgressBar(start,now,total-len(coord),total,prefix='Treating Symmetry',length=50,decimals=3)
 
     return newCoord
 
@@ -532,17 +593,6 @@ def count_neighbours(coords):
         if i[5] == atoms[atoms.index(i[3])+2]:
             i[5] == 'full'
 
-   # for i in coords:
-   #     neighbour = 0
-   #     for j in coords:
-   #         now = datetime.datetime.now()
-   #         printProgressBar(start,now,coords.index(j)+coords.index(i)*len(coords),len(coords)**2,prefix='Counting neighbours',length=50)
-   #         if distance(i,j) < atoms[atoms.index(i[3])+3] and i[3] != j[3]:
-   #             neighbour += 1
-   #     if neighbour == atoms[atoms.index(i[3])+2]:
-   #         i.append('full')
-   #     else:
-   #         i.append(neighbour)
     return coords
 
 def evjen(coords):
@@ -556,29 +606,23 @@ def evjen(coords):
 
 def main():
 
-    print("Input file is : %s'"%(sys.argv[1]))
+    print("Input file is : %s"%(sys.argv[1]))
 
     read_input(sys.argv[1])
+
 
     nA = int(np.floor(2*rBath/a)+2)                                    #We chose the number of time we need to replicate
     nB = int(np.floor(2*rBath/(b*np.sin(np.radians(gamma))))+2)         #to be able to cut the bath 
     nC = int(np.floor(2*rBath/(c*np.sin(np.radians(beta))))+2)
 
-    cmd = 'atomsk '+ cif_file + ' ' +  '-duplicate ' + str(nA) + ' ' + str(nB) + ' ' + str(nC) + ' ' + cif_file.replace('cif','xyz') + ' -v 0' #This is the command that calls the program that generates the big cell
-    os.system(cmd)
+    coords = big_cell(nA,nB,nC)
 
-
-    data = parse(cif_file.replace('cif','xyz'))                               #Read the data from the xyz file
-
-    coords = [[data[i][1],data[i][2],data[i][3]] for i in range(len(data))]
-    labels = [data[i][0] for i in range(len(data))]
-
-    coords = [[coords[i][0],coords[i][1],coords[i][2],labels[i]] for i in range(len(coords))]
 
     coords = translation([nA*a/2,nB*b/2,nC*c/2],coords)                    #Putting the origin at the center of the cell
 
         
     labels = [i[3] for i in coords]
+
     if trsl != 'x':
         translation(trsl,coords)
 
@@ -639,7 +683,6 @@ def main():
         coords = [[coords[i][0],coords[i][1],coords[i][2],labels[i]] for i in range(len(coords))]
    
    #We now have one big cell oriented and centered as we want
-   #The rest of the code will cut what we want in this big cell
 
     coords = cut_bath(rBath,coords)
     coords = find_frag(pattern, npattern ,coords)
@@ -659,12 +702,7 @@ def main():
     coords = sorted(coords,key=operator.itemgetter(5))
 
    
-    ch = 0
-    for i in range(len(coords)):
-        ch += coords[i][5]
-    print("Total charge : % 8.5f"%ch)
 
-    os.system('rm '+cif_file.replace('cif','xyz'))
 
     frag = sorted([i for i in coords if i[4] == 'O'],key=operator.itemgetter(3))
     pp = sorted([i for i in coords if i[4] == 'Cl'],key=operator.itemgetter(3))
@@ -683,28 +721,31 @@ def main():
     if sym != 'x':
         if norep == 0:
             rep = 0
+            prog = 0
             start = datetime.datetime.now()
             for i in range(len(coords)-1):
                 for j in range(i+1,len(coords)):
+                    prog += 1
                     now = datetime.datetime.now()
-                    printProgressBar(start,now,i*len(coords)+j,len(coords)**2,prefix='Calculating nuclear repulsion',length=50)
+                    printProgressBar(start,now,prog,((len(coords)-1)*len(coords))/2,prefix='Calculating nuclear repulsion',length=50)
                     rep += (coords[i][5]*coords[j][5])/distance(coords[i],coords[j])
             print("Nuclear repulsion before symmetry : %f"%rep)
 
         frag = symmetry([[i[0],i[1],i[2]] for i in frag],[i[3] for i in frag], [i[5] for i in frag], sym)
         pp = symmetry([[i[0],i[1],i[2]] for i in pp],[i[3] for i in pp], [i[5] for i in pp], sym)
         bath = symmetry([[i[0],i[1],i[2]] for i in bath],[i[3] for i in bath], [i[5] for i in bath], sym)
-        #bath = [[i[0],i[1],i[2],i[3],i[5]] for i in bath]
 
         coords = frag+pp+bath
         
         if norep == 0:
             start = datetime.datetime.now()
             rep = 0
+            prog = 0
             for i in range(len(coords)-1):
                 for j in range(i+1,len(coords)):
+                    prog += 1
                     now = datetime.datetime.now()
-                    printProgressBar(start,now,i*len(coords)+j,len(coords)**2,prefix='Calculating nuclear repulsion',length=50)
+                    printProgressBar(start,now,prog,((len(coords)-1)*len(coords))/2,prefix='Calculating nuclear repulsion',length=50)
                     rep += (coords[i][4]*coords[j][4])/distance(coords[i],coords[j])
             print("Nuclear repulsion after symmetry : %f"%rep)
     else:
@@ -712,6 +753,10 @@ def main():
         pp = [[i[0],i[1],i[2],i[3],i[5]] for i in pp]
         bath = [[i[0],i[1],i[2],i[3],i[5]] for i in bath]
 
+    ch = 0
+    for i in range(len(coords)):
+        ch += coords[i][4]
+    print("Total charge : % 8.5f"%ch)
     write_input(frag,pp,bath,output_file,sym)
 
     if visu != 0:
