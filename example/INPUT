@@ -1,0 +1,78 @@
+BATH 10
+
+PSEUDO 4
+
+CENTER Ir
+
+X_AXIS O
+
+Y_AXIS O
+
+OUTPUT example
+
+PATTERN 1 Ir 6 O
+
+NPATTERN 1
+
+LATTICE
+a 5.48463
+b 5.48463
+c 25.7977
+alpha 90
+beta 90
+gamma 90
+
+ATOMS Ir 4 6 2.2 Sr 2 9 3.1 O -2 6 3.1
+
+SYMOP
+x,y,z
+1/2+x,1/2+y,1/2+z
+-y,1/2-x,3/4+z
+1/2-y,-x,1/4+z
+1/2+y,1/2+x,-z
++y,+x,1/2-z
+1/2+y,1/2-x,1/2-z
++y,-x,-z
+-y,1/2+x,1/4+z
+1/2-y,+x,3/4+z
+1/2+x,1/2-y,z
++x,-y,1/2+z
+1/2-x,y,1/4-z
+-x,1/2+y,3/4-z
+1/2+x,y,3/4-z
++x,1/2+y,1/4-z
+1/2-x,1/2-y,1/2+z
+-x,-y,+z
+1/2+y,x,1/4+z
++y,1/2+x,3/4+z
+-y,-x,1/2-z
+1/2-y,1/2-x,-z
+-y,x,-z
+1/2-y,1/2+x,1/2-z
+1/2+y,-x,3/4+z
++y,1/2-x,1/4+z
+-x,y,1/2+z
+1/2-x,1/2+y,+z
+x,1/2-y,3/4-z
+1/2+x,-y,1/4-z
+-x,1/2-y,1/4-z
+1/2-x,-y,3/4-z
+POMYS
+
+GENERATOR
+Sr    0.00000   0.00000   0.17573
+Ir    0.00000   0.00000   0.00000
+O     0.19810   0.19810   0.25000
+O     0.00000   0.00000   0.07974
+ROTARENEG
+
+
+EVJEN
+
+SYMETRY C2z
+
+SEEFRAG
+
+NOCOLOR
+
+END_OF_INPUT
