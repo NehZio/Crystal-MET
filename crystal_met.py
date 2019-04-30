@@ -1,3 +1,13 @@
+###########################################################
+#                                                         #
+#      __                                         __      #
+#  ___( o)>  Author  : Léo GASPARD              <(o )___  #
+#  \ <_. )   Twitter : @leo_gaspard              ( ._> /  #
+#   `---'    Mail    : leo.gaspard@outlook.fr     `---'   #
+#                                                         #
+#                                                         #
+###########################################################
+
 import scipy.optimize as optimize
 import numpy as np
 import os
