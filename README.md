@@ -1,5 +1,6 @@
-# bath_generator
-This little python script helps with cutting a fragment in a crystal
+# CRYSTAL MET
+
+Crystal MET (Crystal Maker Effective Tool) is a python programs that helps you building a (huge) system using only the informations taken from a CIF file.
 
 This program needs a few python packages:
 
