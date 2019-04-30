@@ -1,8 +1,6 @@
 # CRYSTAL MET
 
-![GitHub Logo](/images/fig3.png ) ![GitHub Logo](/images/fig4.png =60x60)
-
-<a href="url"><img src="http://github.com/NehZio/Crystal-MET/images/fig4.png" align="left" height="48" width="48" ></a>
+<a href="url"><img src="https://github.com/NehZio/Crystal-MET/blob/master/images/fig4.png" align="left" height="150" width="150" ></a>
 
 Crystal MET (Crystal Maker Effective Tool) is a python3 programs that helps you building a system using only the informations taken from a CIF file.
 
