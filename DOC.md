@@ -1,7 +1,7 @@
-Here's a little guide on how to write the input file
+## Writing an INPUT file
 
 
-MANDATORY KEYWORDS
+# MANDATORY KEYWORDS
 
 CIF system.cif
 
