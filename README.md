@@ -20,3 +20,5 @@ Might be a little slow if you try huge systems but it will never be stuck in a l
 Feel free to use, modify it :)
 
 If you detect any bug please send me an e-mail and I'll try to fix it 
+
+![GitHub Logo](/images/fig1.png)
