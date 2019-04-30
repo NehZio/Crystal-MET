@@ -21,4 +21,10 @@ Feel free to use, modify it :)
 
 If you detect any bug please send me an e-mail and I'll try to fix it 
 
-![GitHub Logo](/images/fig1.png)
+
+## Performances 
+
+The calculation increases exponentially as you increase the number of atoms in the system you want.
+Here are the results of some tests I made :
+
+![GitHub Logo](/images/fig1.png) ![GitHub Logo](/images/fig2.png)
