@@ -621,9 +621,9 @@ def main():
     read_input(sys.argv[1])
 
 
-    nA = int(np.floor(2*rBath/a)+2)                                    #We chose the number of time we need to replicate
-    nB = int(np.floor(2*rBath/(b*np.sin(np.radians(gamma))))+2)         #to be able to cut the bath 
-    nC = int(np.floor(2*rBath/(c*np.sin(np.radians(beta))))+2)
+    nA = int(np.floor(2*rBath/a)+3)                                    #We chose the number of time we need to replicate
+    nB = int(np.floor(2*rBath/(b*np.sin(np.radians(gamma))))+3)         #to be able to cut the bath 
+    nC = int(np.floor(2*rBath/(c*np.sin(np.radians(beta))))+3)
 
     coords = big_cell(nA,nB,nC)
 
@@ -726,6 +726,10 @@ def main():
         g.close()
         os.system('avogadro tmp.xyz')
         os.system('rm tmp.xyz')
+    ch = 0
+    for i in range(len(coords)):
+        ch += coords[i][5]
+    print("Total charge : % 8.5f"%ch)
 
 
     if sym != 'x':
@@ -763,10 +767,6 @@ def main():
         pp = [[i[0],i[1],i[2],i[3],i[5]] for i in pp]
         bath = [[i[0],i[1],i[2],i[3],i[5]] for i in bath]
 
-    ch = 0
-    for i in range(len(coords)):
-        ch += coords[i][4]
-    print("Total charge : % 8.5f"%ch)
     write_input(frag,pp,bath,output_file,sym)
 
     if visu != 0:
