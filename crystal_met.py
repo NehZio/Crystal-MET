@@ -838,7 +838,6 @@ def main():
         os.system('avogadro tmp.xyz')
         os.system('rm tmp.xyz')
 
-    print(len(coords))
 
 
 main()
