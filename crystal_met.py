@@ -179,7 +179,7 @@ def read_input(inputFile):
             zAxis = []
             for i in range(1,len(line)):
                 zAxis.append(line[i])
-        elif line[0] == 'SYMETRY':
+        elif line[0] == 'SYMMETRY':
             print("Will treat symmetry")
             sym = []
             for i in range(1,len(line)):
@@ -318,8 +318,9 @@ def cut_bath(rBath, coords): #Select which atoms are in the bath with distance c
         printProgressBar(start,now,i+1,len(coords),prefix='Cutting the bath',length=50)
         if distance([0,0,0],[coords[i][0],coords[i][1],coords[i][2]]) <= rBath:
                 bath.append([coords[i][0], coords[i][1], coords[i][2], coords[i][3], 'C'])
-
-    return bath 
+        else:
+            printProgressBar(start,now,1,1,prefix='Cutting the bath',length=50)
+            return bath 
 
 def set_pp(rPP,coords, notIn): #Select which atoms are in the first shell of pseudopotential 
 
@@ -329,6 +330,8 @@ def set_pp(rPP,coords, notIn): #Select which atoms are in the first shell of pse
         now = datetime.datetime.now()
         printProgressBar(start,now,i+1,len(coords),prefix='Finding the first shell',length=50)
         for j in range(len(coords)):
+            if coords[i][4] != 'O' or dist_zero(coords[j]) > 2*(max([atoms[k] for k in range(3,len(atoms),4)])*npattern+rPP):
+                break
             if coords[i][4] == 'O':
                 if coords[j][4] == 'C' and coords[j][3] not in notIn:
                     if distance([coords[i][0],coords[i][1],coords[i][2]],[coords[j][0],coords[j][1],coords[j][2]]) <= rPP:
@@ -372,6 +375,8 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
     total = len(coord)
     start = datetime.datetime.now()
     progress = 0
+    coord = sorted(coord,key=dist_zero)
+
     while coord != []:
         toDel = []
         newCoord.append(coord[0])         #Add the atom to a new list
@@ -396,6 +401,8 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
 
         for t in coord:
             index = coord.index(t)
+            if np.absolute(dist_zero(a) - dist_zero(t)) > da:
+                break
             if name == atoms[index]:  #Check if it is the same atom
                 if distance(t,a) == 0:
                     print("ERROR : Twice the same atom")
@@ -416,6 +423,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         progress += 1
                         newCoord[-1].append(name+'b')
                         newCoord[-1].append(charges[index])
+                        toDel.append(index)
                     elif da < distance(t,b) and distance(t,b) < DA:
                         print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
                         print("Are you sure about the xOz symmetry operation ?")
@@ -475,15 +483,14 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
                         print("Are you sure about the xOz symmetry operation ?")
                         break
-                now = datetime.datetime.now()
-                printProgressBar(start,now,progress,total,prefix='Treating Symmetry',length=50,decimals=3)
+            now = datetime.datetime.now()
+            printProgressBar(start,now,progress,total,prefix='Treating Symmetry',length=50,decimals=3)
 
 
         for m in range(len(toDel)):    #We delete the atoms seen in the simmetry
             del coord[toDel[m]-m]
             del atoms[toDel[m]-m]
             del charges[toDel[m]-m]
-
     return newCoord
 
 def write_input(fragCoord,ppCoord,bathCoord,fileName, sym):
@@ -493,19 +500,19 @@ def write_input(fragCoord,ppCoord,bathCoord,fileName, sym):
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(fragCoord)):
             if fragCoord[i][3][-1] == 'a':
-                g.write('%8s      % 7.3f      % 7.3f       % 7.3f      % 8.5f\n' %(fragCoord[i][3].replace('a','')+str(i+1),fragCoord[i][0],fragCoord[i][1],fragCoord[i][2],fragCoord[i][4]))
+                g.write('%8s      % 7.3f      % 7.3f       % 7.3f      % 8.5f\n' %(fragCoord[i][3][:-1]+str(i+1),fragCoord[i][0],fragCoord[i][1],fragCoord[i][2],fragCoord[i][4]))
         g.write("\n\n")
         g.write('PSEUDO \n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(ppCoord)):
             if ppCoord[i][3][-1] == 'a':
-                g.write('%8s      % 7.3f      % 7.3f       % 7.3f      % 8.5f\n' %(ppCoord[i][3].replace('a','')+str(i+1),ppCoord[i][0],ppCoord[i][1],ppCoord[i][2],ppCoord[i][4]))
+                g.write('%8s      % 7.3f      % 7.3f       % 7.3f      % 8.5f\n' %(ppCoord[i][3][:-1]+str(i+1),ppCoord[i][0],ppCoord[i][1],ppCoord[i][2],ppCoord[i][4]))
         g.write("\n\n")
         g.write('CHARGES\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(bathCoord)):
            if bathCoord[i][3][-1] == 'a':
-               g.write('%8s       % 7.3f      % 7.3f       % 7.3f       % 8.5f\n'%(bathCoord[i][3].replace('a','')+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2],bathCoord[i][4]))
+               g.write('%8s       % 7.3f      % 7.3f       % 7.3f       % 8.5f\n'%(bathCoord[i][3][:-1]+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2],bathCoord[i][4]))
     if sym == 'x':
         g.write('FRAGMENT\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
@@ -585,13 +592,32 @@ def optimization(coords):
 def count_neighbours(coords):
     start = datetime.datetime.now()
 
-    for i in coords:
-        i.append(0)
+    coords = sorted(coords,key=get_xyz)
 
     count = 0
 
+    for i in coords:
+        i.append(0)
+
+
     for i in range(len(coords)-1):
         for j in range(i+1,len(coords)):
+            if np.absolute(coords[j][0] - coords[i][0]) > max([atoms[i] for i in range(3,len(atoms),4)]):
+                count += len(coords)-j
+                printProgressBar(start,now,count,(len(coords)*(len(coords)-1))/2,prefix='Counting neighbours',length=50)
+                break
+            elif np.absolute(coords[j][1] - coords[j][1]) > max([atoms[i] for i in range(3,len(atoms),4)]):
+                count += len(coords)-j
+                printProgressBar(start,now,count,(len(coords)*(len(coords)-1))/2,prefix='Counting neighbours',length=50)
+                break
+            elif np.absolute(coords[j][2] - coords[j][2]) > max([atoms[i] for i in range(3,len(atoms),4)]):
+                count += len(coords)-j
+                printProgressBar(start,now,count,(len(coords)*(len(coords)-1))/2,prefix='Counting neighbours',length=50)
+                break
+            elif coords[i][5] == atoms[atoms.index(coords[i][3])+2]:
+                count += len(coords)-j
+                printProgressBar(start,now,count,(len(coords)*(len(coords)-1))/2,prefix='Counting neighbours',length=50)
+                break
             count += 1
             now = datetime.datetime.now()
             printProgressBar(start,now,count,(len(coords)*(len(coords)-1))/2,prefix='Counting neighbours',length=50)
@@ -599,11 +625,15 @@ def count_neighbours(coords):
                 coords[i][5] += 1 
                 coords[j][5] += 1
 
+
     for i in coords:
         if i[5] == atoms[atoms.index(i[3])+2]:
             i[5] == 'full'
 
     return coords
+
+def get_xyz(a):
+    return (a[0],a[1],a[2])
 
 def evjen(coords):
     for i in range(len(coords)):
@@ -613,6 +643,9 @@ def evjen(coords):
             coords[i][5] = atoms[atoms.index(coords[i][3])+1] * coords[i][5]/atoms[atoms.index(coords[i][3])+2]
 
     return coords
+
+def dist_zero(atom):
+    return np.sqrt(atom[0]**2+atom[1]**2+atom[2]**2)
 
 def main():
 
@@ -694,9 +727,13 @@ def main():
    
    #We now have one big cell oriented and centered as we want
 
+    coords = sorted(coords,key=dist_zero)
+
     coords = cut_bath(rBath,coords)
     coords = find_frag(pattern, npattern ,coords)
+    coords = sorted(coords,key=operator.itemgetter(4))
     coords = set_pp(rPP,coords,notIn)
+    coords = sorted(coords,key=dist_zero,reverse=True)
 
     
     if evj == 1:
@@ -709,14 +746,18 @@ def main():
         for i in coords:
             i.append(atoms[atoms.index(i[3])+1])
 
-    coords = sorted(coords,key=operator.itemgetter(5))
-
-   
 
 
-    frag = sorted([i for i in coords if i[4] == 'O'],key=operator.itemgetter(3))
-    pp = sorted([i for i in coords if i[4] == 'Cl'],key=operator.itemgetter(3))
-    bath = sorted([i for i in coords if i[4] == 'C'],key=operator.itemgetter(3))
+   # coords = sorted(coords,key=operator.itemgetter(5))
+   # frag = sorted([i for i in coords if i[4] == 'O'],key=operator.itemgetter(3))
+   # pp = sorted([i for i in coords if i[4] == 'Cl'],key=operator.itemgetter(3))
+   # bath = sorted([i for i in coords if i[4] == 'C'],key=operator.itemgetter(3))
+
+    frag = sorted([i for i in coords if i[4] == 'O'],key=dist_zero)
+    pp = sorted([i for i in coords if i[4] == 'Cl'],key=dist_zero)
+    bath = sorted([i for i in coords if i[4] == 'C'],key=dist_zero)
+
+
 
     if seefrag == 1:
         g = open('tmp.xyz','w')
@@ -767,6 +808,10 @@ def main():
         pp = [[i[0],i[1],i[2],i[3],i[5]] for i in pp]
         bath = [[i[0],i[1],i[2],i[3],i[5]] for i in bath]
 
+    frag = sorted(frag,key=operator.itemgetter(3))
+    pp = sorted(pp,key=operator.itemgetter(3))
+    bath = sorted(bath,key=operator.itemgetter(3))
+
     write_input(frag,pp,bath,output_file,sym)
 
     if visu != 0:
@@ -792,6 +837,8 @@ def main():
         g.close()
         os.system('avogadro tmp.xyz')
         os.system('rm tmp.xyz')
+
+    print(len(coords))
 
 
 main()

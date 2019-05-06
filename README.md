@@ -28,7 +28,7 @@ Crystal MET uses :
 The calculation increases exponentially as you increase the number of atoms in the system you want.
 Here are the results of some tests I made :
 
-![GitHub Logo](/images/fig1.png) ![GitHub Logo](/images/fig2.png)
+![graph1](/images/fig1.png) ![graph2](/images/fig2.png)
 
  ## Contact
  
