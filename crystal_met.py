@@ -67,6 +67,12 @@ def big_cell(na,nb,nc):
         i[0] *= a
         i[1] *= b
         i[2] *= c
+        if i[0] > a:
+            i[0] -= a
+        if i[1] > b:
+            i[1] -= b
+        if i[2] > c:
+            i[2] -= c
         if i[0] < 0:
             i[0] += a
         if i[1] < 0:
@@ -659,6 +665,15 @@ def main():
     nC = int(np.floor(2*rBath/(c*np.sin(np.radians(beta))))+3)
 
     coords = big_cell(nA,nB,nC)
+    f = open('test.xyz','w')
+    f.write(str(len(coords)))
+    f.write('\n\n')
+
+    for i in coords:
+        f.write('%s % 6.3f    % 6.3f    % 6.3f \n'%(i[3],i[0],i[1],i[2]))
+
+    f.close()
+
 
 
     coords = translation([nA*a/2,nB*b/2,nC*c/2],coords)                    #Putting the origin at the center of the cell
@@ -708,7 +723,7 @@ def main():
 
         for i in coords:
             nAxiss = sorted(nAxiss,key=operator.itemgetter(3))
-            if i[3] in nAxis:
+            if i[3] in nAxis and dist_zero(i) > da:
                 if distance(i,[0,0,0]) <= nAxiss[-1][3]:
                     nAxiss[-1] = [i[0],i[1],i[2],distance(i,[0,0,0])]
         newN = np.mean(np.array(nAxiss),axis=0)
@@ -728,7 +743,6 @@ def main():
    #We now have one big cell oriented and centered as we want
 
     coords = sorted(coords,key=dist_zero)
-
     coords = cut_bath(rBath,coords)
     coords = find_frag(pattern, npattern ,coords)
     coords = sorted(coords,key=operator.itemgetter(4))
