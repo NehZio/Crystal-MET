@@ -439,7 +439,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         toDel.append(index)
                     elif da < distance(t,b) and distance(t,b) < DA:
                         print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
-                        print("Are you sure about the xOz symmetry operation ?")
+                        print("Are you sure about the yOz symmetry operation ?")
                         break
                 if 'C2z' in operations:
                     if distance(t,c) <= da:
@@ -450,7 +450,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         toDel.append(index)
                     elif da < distance(t,c) and distance(t,c) < DA:
                         print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
-                        print("Are you sure about the xOz symmetry operation ?")
+                        print("Are you sure about the C2z symmetry operation ?")
                         break
                 if 'xOy' in operations:
                     if distance(t,e) <= da:
@@ -461,7 +461,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         toDel.append(index)
                     elif da < distance(t,e) and distance(t,e) < DA:
                         print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
-                        print("Are you sure about the xOz symmetry operation ?")
+                        print("Are you sure about the xOy symmetry operation ?")
                         break
                 if 'C2y' in operations:
                     if distance(t,f) <= da:
@@ -472,7 +472,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         toDel.append(index)
                     elif da < distance(t,f) and distance(t,f) < DA:
                         print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
-                        print("Are you sure about the xOz symmetry operation ?")
+                        print("Are you sure about the C2y symmetry operation ?")
                         break
                 if 'C2x' in operations:
                     if distance(t,g) <= da:
@@ -483,7 +483,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         toDel.append(index)
                     elif da < distance(t,g) and distance(t,g) < DA:
                         print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
-                        print("Are you sure about the xOz symmetry operation ?")
+                        print("Are you sure about the C2x symmetry operation ?")
                         break
                 if 'i' in operations:
                     if distance(t,h) <= da:
@@ -494,7 +494,7 @@ def symmetry(coord,atoms,charges, operations): #Find symmetry elements in the co
                         toDel.append(index)
                     elif da < distance(t,h) and distance(t,h) < DA:
                         print("Error : This atom should not be there",distance(t,d),t,d,a,charges[index])
-                        print("Are you sure about the xOz symmetry operation ?")
+                        print("Are you sure about the i symmetry operation ?")
                         break
             now = datetime.datetime.now()
             printProgressBar(start,now,progress,total,prefix='Treating Symmetry',length=50,decimals=3)
