@@ -28,8 +28,8 @@ yAxis = 'x'
 zAxis = 'x'
 sym = 'x'
 output_file = 'x'
-pattern = 'x'
-npattern = 'x'
+pattern = []
+npattern = []
 atoms = 'x'
 dist = 'x'
 lattice = 'x'
@@ -194,13 +194,19 @@ def read_input(inputFile):
             output_file = line[1]
         elif line[0] == 'PATTERN':
             pattern = []
-            for i in range(1,len(line)):
-                if i%2 == 1:
-                    pattern.append(int(line[i]))
-                else:
-                    pattern.append(line[i])
+            line = f.readline()
+            while line.strip() != 'NRETTAP':
+                pattern.append([])
+                line = line.split()
+                for i in range(len(line)):
+                    if i%2 == 0:
+                        pattern[-1].append(int(line[i]))
+                    else:
+                        pattern[-1].append(line[i])
+                line = f.readline()
         elif line[0] == 'NPATTERN':
-            npattern = int(line[1])
+            for i in range(1,len(line)):
+                npattern.append(int(line[i]))
         elif line[0] == 'LATTICE':
             a = float(f.readline().split()[1])
             b = float(f.readline().split()[1])
@@ -336,7 +342,7 @@ def set_pp(rPP,coords, notIn): #Select which atoms are in the first shell of pse
         now = datetime.datetime.now()
         printProgressBar(start,now,i+1,len(coords),prefix='Finding the first shell',length=50)
         for j in range(len(coords)):
-            if coords[i][4] != 'O' or dist_zero(coords[j]) > 2*(max([atoms[k] for k in range(3,len(atoms),4)])*npattern+rPP):
+            if coords[i][4] != 'O' or dist_zero(coords[j]) > 2*(max([atoms[k] for k in range(3,len(atoms),4)])*sum(npattern)+rPP):
                 break
             if coords[i][4] == 'O':
                 if coords[j][4] == 'C' and coords[j][3] not in notIn:
@@ -351,6 +357,7 @@ def find_frag(pattern, n, coords):                                              
                                                                                              #the fragment according to user input 
     inFrag = []
     start = datetime.datetime.now()
+    inPattern = []
     for k in range(n):
         closest = [100,100,100]
         now = datetime.datetime.now()
@@ -359,7 +366,7 @@ def find_frag(pattern, n, coords):                                              
             if j[3] == pattern[1]:
                 if distance(j,[0,0,0]) < distance([0,0,0],closest) and [j[0],j[1],j[2],distance(j,j), coords.index(j)] not in inFrag:
                     closest = [j[0],j[1],j[2],distance(j,j), coords.index(j)]
-        for i in range(1,len(pattern)//2):                                                      
+        for i in range(len(pattern)//2):                                                      
             inPattern = [closest]
             for j in range(int(pattern[2*i])):
                 inPattern.append([100,100,100,distance([100,100,100],closest)])
@@ -744,7 +751,8 @@ def main():
 
     coords = sorted(coords,key=dist_zero)
     coords = cut_bath(rBath,coords)
-    coords = find_frag(pattern, npattern ,coords)
+    for i in range(len(pattern)):
+        coords = find_frag(pattern[i], npattern[i],coords)
     coords = sorted(coords,key=operator.itemgetter(4))
     coords = set_pp(rPP,coords,notIn)
     coords = sorted(coords,key=dist_zero,reverse=True)

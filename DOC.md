@@ -10,11 +10,13 @@ There is no obligation to put any order in the keywords
 
 * OUTPUT output_file_name
 
-* PATTERN nAtom1 labelAtom1 nAtom2 labelAtom2 ...  
+* PATTERN 
+  nAtom1 labelAtom1 nAtom2 labelAtom2 ...  
+  ... 
+  NRETTAP
 
-Not that, if you have more than once the Atom1, you will have to place it again at the end (for example, 5 Ir 8 Sr 6 O 5 Ir)
 
-* NPATTERN nPattern
+* NPATTERN nPattern1 nPattern2 ...
 
 * LATTICE
 

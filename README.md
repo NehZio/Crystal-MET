@@ -5,7 +5,7 @@
 <a href="url"><img src="https://github.com/NehZio/Crystal-MET/blob/master/images/fig3.png" align="left" height="400" width="400" ></a>
 
 
-Crystal MET (Crystal Maker Effective Tool) is a python3 programs that helps you building a system using only the informations taken from a CIF file.
+Crystal MET (Crystal Maker Effective Tool) is a python3 programs, developped during an internship at the [LCPQ](www.lcpq.ups-tlse.fr) that helps you building a system using only the informations taken from a CIF file.
 
 Use it with care, always check the output, it may work differently from what you expect.
 
