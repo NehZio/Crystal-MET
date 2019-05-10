@@ -785,7 +785,7 @@ def main():
         g = open('tmp.xyz','w')
         g.write('%i \n \n'%len(frag))
         for j in frag:
-            g.write('%s   % 6.2f    % 6.2f    % 6.2f \n'%(j[3],j[0],j[1],j[2]))
+            g.write('%s   % 6.5f    % 6.5f    % 6.5f \n'%(j[3],j[0],j[1],j[2]))
         g.close()
         os.system('avogadro tmp.xyz')
         os.system('rm tmp.xyz')
