@@ -55,6 +55,11 @@ There is no obligation to put any order in the keywords
 
 ## OPTIONNAL KEYWORDS
 
+* NOINFRAG
+  label x y z
+  ...
+  GARFNION
+
 * TRANSLATE x y z
 
 Crystal MET has some trouble finding specific pattern, sometimes forcing a translation can help finding it

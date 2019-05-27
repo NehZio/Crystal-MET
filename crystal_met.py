@@ -48,6 +48,7 @@ evj = 0
 norep = 0
 symop = []
 generator = []
+noinfrag = []
 
 ##############################
 def big_cell(na,nb,nc):
@@ -263,6 +264,12 @@ def read_input(inputFile):
                 gen = line.split()
                 generator.append([gen[0],float(gen[1]),float(gen[2]),float(gen[3])])
                 line = f.readline()
+        elif line[0] == 'NOINFRAG':
+            line = f.readline()
+            while line.strip() != 'GARFNION':
+                noin = line.split()
+                noinfrag.append([noin[0],float(noin[1]),float(noin[2]),float(noin[3])])
+                line = f.readline()
 
 def parse(fileName):
     f = open(fileName,'r')
@@ -365,7 +372,12 @@ def find_frag(pattern, n, coords):                                              
         for j in coords:
             if j[3] == pattern[1]:
                 if distance(j,[0,0,0]) < distance([0,0,0],closest) and [j[0],j[1],j[2],distance(j,j), coords.index(j)] not in inFrag:
-                    closest = [j[0],j[1],j[2],distance(j,j), coords.index(j)]
+                    notin = 0
+                    for noin in noinfrag:
+                        if distance(j,[noin[1],noin[2],noin[3]]) < da:
+                            notin = 1
+                    if notin == 0:
+                        closest = [j[0],j[1],j[2],distance(j,j), coords.index(j)]
         for i in range(len(pattern)//2):                                                      
             inPattern = [closest]
             for j in range(int(pattern[2*i])):
@@ -667,20 +679,11 @@ def main():
     read_input(sys.argv[1])
 
 
-    nA = int(np.floor(2*rBath/a)+3)                                    #We chose the number of time we need to replicate
-    nB = int(np.floor(2*rBath/(b*np.sin(np.radians(gamma))))+3)         #to be able to cut the bath 
-    nC = int(np.floor(2*rBath/(c*np.sin(np.radians(beta))))+3)
+    nA = int(np.floor(2*rBath/a)+5)                                    #We chose the number of time we need to replicate
+    nB = int(np.floor(2*rBath/(b*np.sin(np.radians(gamma))))+5)         #to be able to cut the bath 
+    nC = int(np.floor(2*rBath/(c*np.sin(np.radians(beta))))+5)
 
     coords = big_cell(nA,nB,nC)
-    f = open('test.xyz','w')
-    f.write(str(len(coords)))
-    f.write('\n\n')
-
-    for i in coords:
-        f.write('%s % 6.3f    % 6.3f    % 6.3f \n'%(i[3],i[0],i[1],i[2]))
-
-    f.close()
-
 
 
     coords = translation([nA*a/2,nB*b/2,nC*c/2],coords)                    #Putting the origin at the center of the cell
