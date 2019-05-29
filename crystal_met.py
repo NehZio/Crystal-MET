@@ -679,9 +679,9 @@ def main():
     read_input(sys.argv[1])
 
 
-    nA = int(np.floor(2*rBath/a)+5)                                    #We chose the number of time we need to replicate
-    nB = int(np.floor(2*rBath/(b*np.sin(np.radians(gamma))))+5)         #to be able to cut the bath 
-    nC = int(np.floor(2*rBath/(c*np.sin(np.radians(beta))))+5)
+    nA = int(np.floor(2*rBath/a)+2)                                    #We chose the number of time we need to replicate
+    nB = int(np.floor(2*rBath/(b*np.sin(np.radians(gamma))))+2)         #to be able to cut the bath 
+    nC = int(np.floor(2*rBath/(c*np.sin(np.radians(beta))))+2)
 
     coords = big_cell(nA,nB,nC)
 
