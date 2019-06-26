@@ -82,7 +82,7 @@ def big_cell(na,nb,nc):
             i[2] += c
     for i in coords:
         if i not in newCoords:
-            if i[0] < a and i[1] < b and i[2] < c:
+            if i[0] <= a and i[1] <= b and i[2] <= c:
                 newCoords.append(i)
     
     for i in newCoords:
@@ -693,7 +693,9 @@ def main():
     coords = big_cell(nA,nB,nC)
 
 
+
     coords = translation([nA*a/2,nB*b/2,nC*c/2],coords)                    #Putting the origin at the center of the cell
+    
 
         
     labels = [i[3] for i in coords]
@@ -756,6 +758,7 @@ def main():
         rMat = rot_matrix(oldN,newN)
         coords = rotation(coords,rMat)
         coords = [[coords[i][0],coords[i][1],coords[i][2],labels[i]] for i in range(len(coords))]
+    
    
    #We now have one big cell oriented and centered as we want
 
