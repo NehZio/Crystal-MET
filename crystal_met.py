@@ -82,7 +82,7 @@ def big_cell(na,nb,nc):
             i[2] += c
     for i in coords:
         if i not in newCoords:
-            if i[0] <= a and i[1] <= b and i[2] <= c:
+            if i[0] < a and i[1] < b and i[2] < c:
                 newCoords.append(i)
     
     for i in newCoords:
