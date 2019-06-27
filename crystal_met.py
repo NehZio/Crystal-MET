@@ -532,34 +532,34 @@ def write_input(fragCoord,ppCoord,bathCoord,fileName, sym):
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(fragCoord)):
             if fragCoord[i][3][-1] == 'a':
-                g.write('%8s      % 7.3f      % 7.3f       % 7.3f      % 8.5f\n' %(fragCoord[i][3][:-1]+str(i+1),fragCoord[i][0],fragCoord[i][1],fragCoord[i][2],fragCoord[i][4]))
+                g.write('%8s      % 7.8f      % 7.8f       % 7.8f      % 8.5f\n' %(fragCoord[i][3][:-1]+str(i+1),fragCoord[i][0],fragCoord[i][1],fragCoord[i][2],fragCoord[i][4]))
         g.write("\n\n")
         g.write('PSEUDO \n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(ppCoord)):
             if ppCoord[i][3][-1] == 'a':
-                g.write('%8s      % 7.3f      % 7.3f       % 7.3f      % 8.5f\n' %(ppCoord[i][3][:-1]+str(i+1),ppCoord[i][0],ppCoord[i][1],ppCoord[i][2],ppCoord[i][4]))
+                g.write('%8s      % 7.8f      % 7.8f       % 7.8f      % 8.5f\n' %(ppCoord[i][3][:-1]+str(i+1),ppCoord[i][0],ppCoord[i][1],ppCoord[i][2],ppCoord[i][4]))
         g.write("\n\n")
         g.write('CHARGES\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(bathCoord)):
            if bathCoord[i][3][-1] == 'a':
-               g.write('%8s       % 7.3f      % 7.3f       % 7.3f       % 8.5f\n'%(bathCoord[i][3][:-1]+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2],bathCoord[i][4]))
+               g.write('%8s       % 7.8f      % 7.8f       % 7.8f       % 8.5f\n'%(bathCoord[i][3][:-1]+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2],bathCoord[i][4]))
     if sym == 'x':
         g.write('FRAGMENT\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(fragCoord)):
-            g.write('%8s      % 7.3f      % 7.3f       % 7.3f       % 8.5f\n' %(fragCoord[i][3]+str(i+1),fragCoord[i][0],fragCoord[i][1],fragCoord[i][2], fragCoord[i][4]))
+            g.write('%8s      % 7.8f      % 7.8f       % 7.8f       % 8.5f\n' %(fragCoord[i][3]+str(i+1),fragCoord[i][0],fragCoord[i][1],fragCoord[i][2], fragCoord[i][4]))
         g.write('\n\n')
         g.write('PSEUDO\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(ppCoord)):
-            g.write('%8s      % 7.3f      % 7.3f       % 7.3f       % 8.5f\n' %(ppCoord[i][3]+str(i+1),ppCoord[i][0],ppCoord[i][1],ppCoord[i][2],ppCoord[i][4]))
+            g.write('%8s      % 7.8f      % 7.8f       % 7.8f       % 8.5f\n' %(ppCoord[i][3]+str(i+1),ppCoord[i][0],ppCoord[i][1],ppCoord[i][2],ppCoord[i][4]))
         g.write('\n\n')
         g.write('CHARGES\n')
         g.write('LABEL      X           Y            Z           CHARGE\n')
         for i in range(len(bathCoord)):
-            g.write('%8s      % 7.3f      % 7.3f       % 7.3f       % 8.5f\n' %(bathCoord[i][3]+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2], bathCoord[i][4]))
+            g.write('%8s      % 7.8f      % 7.8f       % 7.8f       % 8.5f\n' %(bathCoord[i][3]+str(i+1),bathCoord[i][0],bathCoord[i][1],bathCoord[i][2], bathCoord[i][4]))
     g.close()
 
 def translation(vec, coords): 
@@ -854,11 +854,11 @@ def main():
         if visu == 1:
             g.write('%i \n\n'%(len(frag)+len(pp)+len(bath)))
             for i in frag:
-                g.write('O    % 7.3f   % 7.3f   % 7.3f  \n'%(i[0],i[1],i[2]))
+                g.write('O    % 7.8f   % 7.6f   % 7.8f  \n'%(i[0],i[1],i[2]))
             for i in pp:
-                g.write('Cl    % 7.3f   % 7.3f   % 7.3f  \n'%(i[0],i[1],i[2]))
+                g.write('Cl    % 7.8f   % 7.8f   % 7.8f  \n'%(i[0],i[1],i[2]))
             for i in bath:
-                g.write('C    % 7.3f   % 7.3f   % 7.3f  \n'%(i[0],i[1],i[2]))
+                g.write('C    % 7.8f   % 7.8f   % 7.8f  \n'%(i[0],i[1],i[2]))
         elif visu == 2:
             coords = frag+pp+bath
             if sym != 'x':
@@ -868,7 +868,7 @@ def main():
                         i[3] = i[3][:-1]
             g.write('%i \n \n'%len(coords))
             for i in coords:
-                g.write('%s    % 7.3f   % 7.3f   % 7.3f  \n'%(i[3],i[0],i[1],i[2]))
+                g.write('%s    % 7.8f   % 7.8f   % 7.8f  \n'%(i[3],i[0],i[1],i[2]))
         g.close()
         os.system('avogadro tmp.xyz')
         os.system('rm tmp.xyz')
