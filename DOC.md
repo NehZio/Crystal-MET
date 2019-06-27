@@ -44,6 +44,8 @@ There is no obligation to put any order in the keywords
    
 * GENERATOR
 
+  **NEVER PUT 1.000 AS FRACTIONNAL OCCUPATION, PUT 0.000 INSTEAD**
+
   atom1 x_frac y_frac z_frac
   
   ...
